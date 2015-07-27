@@ -1,26 +1,9 @@
 {
   "lids_policy": {
     "retired": false, 
-    "description": "This is a LIDS policy for Ubuntu and Debian Linux servers.\nRecommended for: General system security, PCI-DSS, HIPAA, SANS 20, SOC 2", 
-    "url": "https://api.cloudpassage.com/v1/lids_policies/deae3260dbec013270bc3c764e10c220", 
-    "used_by": [
-      {
-        "id": "dd1bcf0a03d911e58dee13fe5e599fba", 
-        "name": "Canary"
-      }, 
-      {
-        "id": "8ac522a0dbeb01320bd73c764e108057", 
-        "name": "Graphite Server"
-      }, 
-      {
-        "id": "9b45e4d0dbeb01320bd63c764e108057", 
-        "name": "Beagles"
-      }, 
-      {
-        "id": "795fe080dbeb013270bc3c764e10c220", 
-        "name": "Apache Proxy"
-      }
-    ], 
+    "description": "This is a LIDS policy for Red Hat and CentOS Linux servers.\nRecommended for: General system security, PCI-DSS, HIPAA, SANS 20, SOC 2", 
+    "url": "https://api.cloudpassage.com/v1/lids_policies/31bbb540d68801320b6d3c764e108057", 
+    "used_by": [], 
     "platform": "linux", 
     "rules": [
       {
@@ -30,7 +13,7 @@
         "critical": false, 
         "active": true, 
         "search_pattern": "userid changed to", 
-        "file_path": "/var/log/syslog"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -39,7 +22,7 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "Accepted password for root from", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -47,8 +30,8 @@
         "alert": true, 
         "critical": true, 
         "active": true, 
-        "search_pattern": "password changed for", 
-        "file_path": "/var/log/auth.log"
+        "search_pattern": "password change for", 
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -57,7 +40,7 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "COMMAND\\=\\/sbin\\/reboot", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -66,7 +49,7 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "possible SYN flooding on port", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -74,8 +57,8 @@
         "alert": true, 
         "critical": true, 
         "active": true, 
-        "search_pattern": "POSSIBLE BREAK\\-INATTEMPT\\!", 
-        "file_path": "/var/log/auth.log"
+        "search_pattern": "POSSIBLE BREAK\\-IN ATTEMPT\\!", 
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -84,7 +67,7 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "Did not receive identification string from", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -93,7 +76,7 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "Too many authentication failures from", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -102,7 +85,7 @@
         "critical": false, 
         "active": true, 
         "search_pattern": "password changed for", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -111,16 +94,16 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "3 incorrect password attempts", 
-        "file_path": "/var/log/syslog"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
-        "name": "Invalid User Login Attempt", 
+        "name": "Invalid user login attempt", 
         "alert": true, 
         "critical": true, 
         "active": true, 
         "search_pattern": "input\\_userauth\\_request\\: invalid user", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -129,7 +112,7 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "entered promiscuous mode", 
-        "file_path": "/var/log/kern.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -138,16 +121,16 @@
         "critical": false, 
         "active": true, 
         "search_pattern": "groupid changed to", 
-        "file_path": "/var/log/syslog"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
         "name": "Failure", 
-        "alert": true, 
-        "critical": true, 
+        "alert": false, 
+        "critical": false, 
         "active": true, 
         "search_pattern": "fail", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -156,7 +139,16 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "Failed password for root", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
+      }, 
+      {
+        "kind": "text", 
+        "name": "Failed login", 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": "Failed password for", 
+        "file_path": "/var/log/secure"
       }, 
       {
         "kind": "text", 
@@ -165,11 +157,11 @@
         "critical": true, 
         "active": true, 
         "search_pattern": "Bad protocol version identification", 
-        "file_path": "/var/log/auth.log"
+        "file_path": "/var/log/secure"
       }
     ], 
     "template": false, 
-    "id": "deae3260dbec013270bc3c764e10c220", 
-    "name": "OS Core (Debian-based Linux) v1 BETA CS"
+    "id": "31bbb540d68801320b6d3c764e108057", 
+    "name": "testing"
   }
 }

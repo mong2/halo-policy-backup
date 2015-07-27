@@ -1,0 +1,89 @@
+{
+  "firewall_policy": {
+    "description": "LDAP server firewall policy", 
+    "firewall_rules": [
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "log": false, 
+        "chain": "INPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/4b1dbce0887a0132aff93c764e10c221/firewall_rules/25d39790dbfa013270bf3c764e10c220", 
+        "active": true, 
+        "connection_states": "ESTABLISHED,RELATED", 
+        "action": "ACCEPT", 
+        "id": "25d39790dbfa013270bf3c764e10c220"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "firewall_service": {
+          "protocol": "TCP", 
+          "name": "ssh", 
+          "url": "https://api.cloudpassage.com/v1/firewall_services/ea3fe1309956012ee2db4040ebe4a8e4", 
+          "system": true, 
+          "id": "ea3fe1309956012ee2db4040ebe4a8e4", 
+          "port": "22"
+        }, 
+        "log": false, 
+        "chain": "INPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/4b1dbce0887a0132aff93c764e10c221/firewall_rules/0fc80930dbcf0132fdd13c764e10c221", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "ACCEPT", 
+        "id": "0fc80930dbcf0132fdd13c764e10c221"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "firewall_service": {
+          "protocol": "TCP", 
+          "name": "http", 
+          "url": "https://api.cloudpassage.com/v1/firewall_services/ea4b3fa09956012ee2db4040ebe4a8e4", 
+          "system": true, 
+          "id": "ea4b3fa09956012ee2db4040ebe4a8e4", 
+          "port": "80"
+        }, 
+        "log": false, 
+        "chain": "INPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/4b1dbce0887a0132aff93c764e10c221/firewall_rules/88357f80dc2f013270c33c764e10c220", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "ACCEPT", 
+        "id": "88357f80dc2f013270c33c764e10c220"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "log": false, 
+        "chain": "INPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/4b1dbce0887a0132aff93c764e10c221/firewall_rules/8e9307f0dbfa0132fddc3c764e10c221", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "DROP", 
+        "id": "8e9307f0dbfa0132fddc3c764e10c221"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "log": false, 
+        "chain": "OUTPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/4b1dbce0887a0132aff93c764e10c221/firewall_rules/2e07df80dbda01320bd13c764e108057", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "REJECT", 
+        "id": "2e07df80dbda01320bd13c764e108057"
+      }
+    ], 
+    "url": "https://api.cloudpassage.com/v1/firewall_policies/4b1dbce0887a0132aff93c764e10c221", 
+    "used_by": [
+      {
+        "id": "a76e01d03ac00132eccc3c764e10c220", 
+        "name": "AWS"
+      }
+    ], 
+    "platform": "linux", 
+    "ignore_forwarding_rules": false, 
+    "id": "4b1dbce0887a0132aff93c764e10c221", 
+    "name": "LDAP server (test)"
+  }
+}

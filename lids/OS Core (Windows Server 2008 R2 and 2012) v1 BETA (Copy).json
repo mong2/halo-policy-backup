@@ -1,0 +1,244 @@
+{
+  "lids_policy": {
+    "retired": false, 
+    "description": "This is a LIDS policy for Windows Server 2008 R2 and Windows Server 2012.\nRecommended for: General system security, PCI-DSS, HIPAA, SANS 20, SOC 2", 
+    "url": "https://api.cloudpassage.com/v1/lids_policies/056a0760db2b01320bc03c764e108057", 
+    "used_by": [], 
+    "platform": "windows", 
+    "rules": [
+      {
+        "kind": "windows_channel", 
+        "name": "The Windows Firewall Service was unable to retrieve the security policy from the local storage.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 5027, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "The Windows Firewall Service was unable to parse the new security policy.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 5028, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "The Windows Firewall Service failed to start.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 5030, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "The Windows Firewall Service failed to initialize the driver.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 5029, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "The Windows Firewall Driver detected critical runtime error. Terminating.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 5037, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "The system time was changed.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4616, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "The system audit policy was changed.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4719, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "The local Guest account was enabled.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4722, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": "Guest"
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "The audit log was cleared.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 1102, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "System security access was granted to an account.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4717, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "Network Policy Server quarantined a user.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 6276, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "Network Policy Server locked the user account due to repeated failed authentication attempts.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 6279, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "Network Policy Server - host did not meet defined health policy.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 6277, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "Code integrity determined that the page hashes of an image file are not valid.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 6281, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "Code integrity determined that the image hash of a file is not valid.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 5038, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "An attempt was made to reset the Administrator account's password.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4724, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": "TargetUserName.>Administrator"
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "A user was added to the Administrators group.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4732, 
+        "alert": false, 
+        "critical": false, 
+        "active": true, 
+        "search_pattern": "TargetUserName.>Administrators"
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "A user right was assigned.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4704, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "A service was installed on the system.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4697, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "A replay attack was detected.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4649, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "A new process has been created.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4688, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "A local user account was created.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4720, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }, 
+      {
+        "kind": "windows_channel", 
+        "name": "A change has been made to Windows Firewall exception list. A rule was added.", 
+        "windows_event_channel": "Security", 
+        "windows_event_id": 4946, 
+        "alert": true, 
+        "critical": true, 
+        "active": true, 
+        "search_pattern": ""
+      }
+    ], 
+    "template": false, 
+    "id": "056a0760db2b01320bc03c764e108057", 
+    "name": "OS Core (Windows Server 2008 R2 and 2012) v1 BETA (Copy)"
+  }
+}

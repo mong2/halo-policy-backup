@@ -1,25 +1,8 @@
 {
   "policy": {
-    "name": "OS Core (Debian-based Linux) v3 CS", 
-    "url": "https://api.cloudpassage.com/v1/policies/a68eb790dbec013270bd3c764e10c220", 
-    "used_by": [
-      {
-        "id": "dd1bcf0a03d911e58dee13fe5e599fba", 
-        "name": "Canary"
-      }, 
-      {
-        "id": "8ac522a0dbeb01320bd73c764e108057", 
-        "name": "Graphite Server"
-      }, 
-      {
-        "id": "9b45e4d0dbeb01320bd63c764e108057", 
-        "name": "Beagles"
-      }, 
-      {
-        "id": "795fe080dbeb013270bc3c764e10c220", 
-        "name": "Apache Proxy"
-      }
-    ], 
+    "name": "OS Core (Debian-based Linux) v3 Copy", 
+    "url": "https://api.cloudpassage.com/v1/policies/850c749010660132f2ec3c764e108057", 
+    "used_by": [], 
     "platform": "linux", 
     "rules": [
       {
@@ -729,7 +712,7 @@
         "name": "/etc/init.d ownership and permissions"
       }
     ], 
-    "id": "a68eb790dbec013270bd3c764e10c220", 
+    "id": "850c749010660132f2ec3c764e108057", 
     "description": "This policy checks that the most critical security settings are in place for common versions of Ubuntu (and other Debian-based) Linux distributions."
   }
 }
