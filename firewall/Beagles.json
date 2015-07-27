@@ -1,0 +1,144 @@
+{
+  "firewall_policy": {
+    "description": "", 
+    "firewall_rules": [
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "firewall_service": {
+          "protocol": "TCP", 
+          "name": "ssh", 
+          "url": "https://api.cloudpassage.com/v1/firewall_services/ea3fe1309956012ee2db4040ebe4a8e4", 
+          "system": true, 
+          "id": "ea3fe1309956012ee2db4040ebe4a8e4", 
+          "port": "22"
+        }, 
+        "log": false, 
+        "chain": "INPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/63544150dbec0132fdd83c764e10c221/firewall_rules/63588930dbec0132fdd83c764e10c221", 
+        "firewall_source": {
+          "type": "UserGroup", 
+          "name": "All GhostPorts users"
+        }, 
+        "active": true, 
+        "connection_states": null, 
+        "action": "ACCEPT", 
+        "id": "63588930dbec0132fdd83c764e10c221"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "log": false, 
+        "chain": "INPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/63544150dbec0132fdd83c764e10c221/firewall_rules/635b3610dbec0132fdd83c764e10c221", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "DROP", 
+        "id": "635b3610dbec0132fdd83c764e10c221"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "firewall_service": {
+          "protocol": "TCP", 
+          "name": "http", 
+          "url": "https://api.cloudpassage.com/v1/firewall_services/ea4b3fa09956012ee2db4040ebe4a8e4", 
+          "system": true, 
+          "id": "ea4b3fa09956012ee2db4040ebe4a8e4", 
+          "port": "80"
+        }, 
+        "log": false, 
+        "chain": "OUTPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/63544150dbec0132fdd83c764e10c221/firewall_rules/635d6230dbec0132fdd83c764e10c221", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "ACCEPT", 
+        "id": "635d6230dbec0132fdd83c764e10c221"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "firewall_service": {
+          "protocol": "TCP", 
+          "name": "https", 
+          "url": "https://api.cloudpassage.com/v1/firewall_services/ea4b81f09956012ee2db4040ebe4a8e4", 
+          "system": true, 
+          "id": "ea4b81f09956012ee2db4040ebe4a8e4", 
+          "port": "443"
+        }, 
+        "log": false, 
+        "chain": "OUTPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/63544150dbec0132fdd83c764e10c221/firewall_rules/635fba00dbec0132fdd83c764e10c221", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "ACCEPT", 
+        "id": "635fba00dbec0132fdd83c764e10c221"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "firewall_service": {
+          "protocol": "TCP", 
+          "name": "Graphite-Metrics", 
+          "url": "https://api.cloudpassage.com/v1/firewall_services/d74a76a203df11e58dee13fe5e599fba", 
+          "system": false, 
+          "id": "d74a76a203df11e58dee13fe5e599fba", 
+          "port": "2003"
+        }, 
+        "log": false, 
+        "chain": "OUTPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/63544150dbec0132fdd83c764e10c221/firewall_rules/ed50d0fe03df11e5853b110d0eeccb19", 
+        "firewall_target": {
+          "type": "Group", 
+          "id": "8ac522a0dbeb01320bd73c764e108057", 
+          "name": "Graphite Server"
+        }, 
+        "active": true, 
+        "connection_states": null, 
+        "action": "ACCEPT", 
+        "id": "ed50d0fe03df11e5853b110d0eeccb19"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "firewall_service": {
+          "protocol": "UDP", 
+          "name": "NTP", 
+          "url": "https://api.cloudpassage.com/v1/firewall_services/903ecd6403ec11e5932243a6e5108075", 
+          "system": false, 
+          "id": "903ecd6403ec11e5932243a6e5108075", 
+          "port": "123"
+        }, 
+        "log": false, 
+        "chain": "OUTPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/63544150dbec0132fdd83c764e10c221/firewall_rules/c30e264a03ec11e5b39a510be5dcd7b4", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "ACCEPT", 
+        "id": "c30e264a03ec11e5b39a510be5dcd7b4"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
+        "log": false, 
+        "chain": "OUTPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/63544150dbec0132fdd83c764e10c221/firewall_rules/6361c9f0dbec0132fdd83c764e10c221", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "REJECT", 
+        "id": "6361c9f0dbec0132fdd83c764e10c221"
+      }
+    ], 
+    "url": "https://api.cloudpassage.com/v1/firewall_policies/63544150dbec0132fdd83c764e10c221", 
+    "used_by": [
+      {
+        "id": "9b45e4d0dbeb01320bd63c764e108057", 
+        "name": "Beagles"
+      }
+    ], 
+    "platform": "linux", 
+    "ignore_forwarding_rules": false, 
+    "id": "63544150dbec0132fdd83c764e10c221", 
+    "name": "Beagles"
+  }
+}

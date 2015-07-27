@@ -1,0 +1,735 @@
+{
+  "policy": {
+    "name": "OS Core (Debian-based Linux) v3 CS", 
+    "url": "https://api.cloudpassage.com/v1/policies/a68eb790dbec013270bd3c764e10c220", 
+    "used_by": [
+      {
+        "id": "dd1bcf0a03d911e58dee13fe5e599fba", 
+        "name": "Canary"
+      }, 
+      {
+        "id": "8ac522a0dbeb01320bd73c764e108057", 
+        "name": "Graphite Server"
+      }, 
+      {
+        "id": "9b45e4d0dbeb01320bd63c764e108057", 
+        "name": "Beagles"
+      }, 
+      {
+        "id": "795fe080dbeb013270bc3c764e10c220", 
+        "name": "Apache Proxy"
+      }
+    ], 
+    "platform": "linux", 
+    "rules": [
+      {
+        "comment": "This rule simply searches for common inetd/xinetd superserver processes. \n \ninetd/xinetd processes act as \"parent\" daemons for other services, many of which are dangerous or undesirable (e.g. chargen and echo).\n\nxinetd commonly runs by default and is often used by attackers to create rootkits or other backdoors. inetd is a precursor to xinetd and its presence may indicate a rootkit or a need to update the server's configuration. inetd/xinetd and its child daemons are opportune choices for rootkits since the rootkit process would not activate until a remote connection occurred.\n\nIf inetd or xinetd are present, its configuration should be examined to ensure that it is not activating dangerous, undesirable or unauthorized services. xinetd is an improved version if inetd that provides additional controls over the daemons it manages, such as network access control.\n\nThe inetd or xinetd services should be disabled if not required.\n\nIMPORTANT NOTE: inetd/xinetd activates the services it controls when requests for those services appear, meaning undesired or malicious services may be accessible even though not present in a process list. If inetd/xinetd is used, its configuration should be closely examined.\n", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "network_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "processes": "in.inetd, inetd, in.xinetd, xinetd", 
+            "exportable": true, 
+            "object_type": "process_presence", 
+            "suggestion": "inetd/xinetd processes act as \"parent\" daemons for other services, many of which are dangerous or undesirable (e.g. chargen and echo).\n\nIf inetd or xinetd is unexpected but present it should be disabled in system startup scripts.  Here are example commands that you may need to customize for your environment:\nchkconfig xinetd off\nchkconfig inetd off\nservice xinetd stop\nservice inetd stop\n\nIf inetd or xinetd are in use, configurations should be closely examined to ensure that it is not serving dangerous, undesirable or unauthorized services.", 
+            "active": true, 
+            "present": "false"
+          }
+        ], 
+        "name": "Detect inetd/xinetd service"
+      }, 
+      {
+        "comment": "Passwords that are too short or are not changed at a reasonable frequency are a major cause of system compromises. Brute-force account attacks via sshd interfaces is one of the most common forms of attacker reconnaissance. Issues of password length, complexity, rotation and re-use are matters of individual policy. The settings below reflect a rational starting point based on the idea that a longer password is \"survivable\" for a longer period of time.\r\n\r\nIMPORTANT: the PASS_MAX_DAYS, PASS_MIN_DAYS and PASS_WARN_AGE are only used at the time of account creation. Any changes to these settings won't affect existing accounts, which requires updating the /etc/shadow file manually or using system utilities. Refer to the man page for login.defs for details.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "PASS_MAX_DAYS", 
+            "desired_value": "180", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Server account passwords should be rotated each six months at an absolute minimum. If passwords shorter than ten characters are permitted then more frequent password rotation should be implemented.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either add:\r\nPASS_MAX_DAYS 180\r\nto /etc/login.defs by hand, or copy and paste these commands:\r\nsudo sed -i -e 's/#*\\(PASS_MAX_DAYS .*\\)/#\\1/i' /etc/login.defs\r\necho 'PASS_MAX_DAYS 180' | sudo tee -a /etc/login.defs\r\n\r\nIMPORTANT: the PASS_MAX_DAYS, PASS_MIN_DAYS and PASS_WARN_AGE are only used at the time of account creation. Any changes to these settings won't affect existing accounts, which requires updating the /etc/shadow file manually or using system utilities. Refer to the man page for login.defs for details.", 
+            "active": true, 
+            "config_file_path": "/etc/login.defs"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "PASS_MIN_LEN", 
+            "desired_value": "8", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Passwords of at least 8 characters are strongly recommended, especially considering that construction rules requiring both numbers and letters cannot be enforced by default.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either add:\r\nPASS_MIN_LEN 8\r\nto /etc/login.defs by hand, or copy and paste these commands:\r\nsudo sed -i -e 's/#*\\(PASS_MIN_LEN .*\\)/#\\1/i' /etc/login.defs\r\necho 'PASS_MIN_LEN 8' | sudo tee -a /etc/login.defs\r\n\r\nIMPORTANT: the PASS_MAX_DAYS, PASS_MIN_DAYS and PASS_WARN_AGE are only used at the time of account creation. Existing users' password expiration rules should be double-checked in the /etc/shadow file to ensure that password changes (and therefore changes to minimum password length) are enforced.\r\n\r\nTIP: you can use the \"chage\" command to evaluate and manage account password status. Refer to \"man chage\" for more information. Here is an example of a one-line script that displays password settings and status for all system users:\r\n\r\nfor user in `cat /etc/passwd| cut -f1 -d':'`; do echo \"$user password status:\" && chage -l $user && echo; done\r\n", 
+            "active": false, 
+            "config_file_path": "/etc/login.defs"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "PASS_WARN_AGE", 
+            "desired_value": "7", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "The PASS_WARN_AGE setting dictates when users begin to see warnings about upcoming password expiration.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either add:\r\nPASS_WARN_AGE 7\r\nto /etc/login.defs by hand, or copy and paste these commands:\r\nsudo sed -i -e 's/#*\\(PASS_WARN_AGE .*\\)/#\\1/i' /etc/login.defs\r\necho 'PASS_WARN_AGE 7' | sudo tee -a /etc/login.defs\r\n\r\nIMPORTANT: the PASS_MAX_DAYS, PASS_MIN_DAYS and PASS_WARN_AGE are only used at the time of account creation. Existing users' password expiration rules should be double-checked in the /etc/shadow file to ensure that password changes (and therefor changes to minimum password length) are enforced.\r\n\r\nTIP: you can use the \"chage\" command to evaluate and manage account password status. Refer to \"man chage\" for more information. Here is an example of a one-line script that displays password settings and status for all system users:\r\n\r\nfor user in `cat /etc/passwd| cut -f1 -d':'`; do echo \"$user password status:\" && chage -l $user && echo; done\r\n", 
+            "active": true, 
+            "config_file_path": "/etc/login.defs"
+          }, 
+          {
+            "files": "/etc/pam.d/common-password", 
+            "exportable": true, 
+            "object_type": "file_string_presence", 
+            "patterns": "password.*\\spam_unix.so.*\\smin=8", 
+            "suggestion": "Passwords of at least 8 characters are strongly recommended, especially considering that construction rules requiring both numbers and letters cannot be enforced by default.\r\n\r\nThe following may need to be customized for your environment.  Add:\r\nmin=8\r\nto the following line in /etc/pam.d/common-password by hand:\r\npassword ... pam_unix.so ... min=8 ...\r\n\r\nIMPORTANT: the password length is only checked at the time of account creation or password update.  Existing users' password length should be double-checked to ensure that password minimum length is enforced.\r\n", 
+            "active": true, 
+            "present": true
+          }
+        ], 
+        "name": "User account password policies"
+      }, 
+      {
+        "comment": "The /var/spool/cron directory contains schedule job data for individual users. These files are a frequent target of abuse by malicious users and software. The permissions on the cron spool directory should be closely protected.\n\nNOTE: User ownership for each file in /var/spool/cron should be set to that file's owner. Only user ownership for the root user is set below. Group ownership should be set to root with an ACL of 700.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "files": "/var/spool/cron", 
+            "exportable": true, 
+            "object_type": "directory_acl", 
+            "acls": "NOT: **2,**3,**6,**7", 
+            "suggestion": "If a malicious user has the ability to create a file in the /var/spool/cron directory, they can easily deploy persistent or scheduled malware. The /var/spool/cron directory should have an ACL of 700 and should have root user and group ownership.\n\nIf this check fails, use the chmod command to change the ACL on this directory to 700:\n\nchmod 700 /var/spool/cron\n", 
+            "active": true
+          }, 
+          {
+            "folders": "/var/spool/cron", 
+            "exportable": true, 
+            "object_type": "directory_user_ownership", 
+            "suggestion": "If a malicious user has the ability to create a file in the /var/spool/cron directory, they can easily deploy persistent or scheduled malware. The /var/spool/cron directory should have root user ownership.\n\nIf this check fails, use the chown command to set root user ownership on this directory:\n\nchown root /var/spool/cron\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/var/spool/cron", 
+            "exportable": true, 
+            "object_type": "directory_group_ownership", 
+            "suggestion": "If a malicious user has the ability to create a file in the /var/spool/cron directory, they can easily deploy persistent or scheduled malware. The /var/spool/cron directory should have root group ownership.\n\nIf this check fails, use the chown command to set root group ownership on this directory:\n\nchgrp root /var/spool/cron\n", 
+            "active": true, 
+            "owned_by": "root"
+          }
+        ], 
+        "name": "Protect cron spool directory"
+      }, 
+      {
+        "comment": "The crontab system typically uses a number of subdirectories to store scheduled job information based on frequency. Any executable found in on of these folders will automatically be run on the scheduled frequency. For example, a script placed in the /etc/cron.monthly folder will automatically be run each month.\n\nThese folders are an extremely frequent target for malicious users and software. Placing scripts in these folders is an extremely easy way to ensure that malware remains persistent. For this reason, these folders should be tightly controlled.\n\nNote: An entry in a cron table is NOT REQUIRED for scripts in these subdirectories to be run automatically.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "folders": "/etc/cron.daily, /etc/cron.hourly, /etc/cron.d, /etc/cron.monthly, /etc/cron.weekly", 
+            "exportable": true, 
+            "object_type": "directory_user_ownership", 
+            "suggestion": "The crontab folders are an extremely frequent target for malicious users and software. Placing scripts in these folders is an extremely easy way to ensure that malware remains persistent. For this reason, these folders should be tightly controlled. All crontab folders should have an ACL of 600 with root user and group ownership. \n\nIf this check fails, the chown command should be used to set root user ownership:\n\nchown root /etc/cron.d /etc/cron.monthly /etc/cron.weekly /etc/cron.daily /etc/cron.hourly\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/cron.d, /etc/cron.monthly, /etc/cron.weekly, /etc/cron.daily, /etc/cron.hourly", 
+            "exportable": true, 
+            "object_type": "directory_group_ownership", 
+            "suggestion": "The crontab folders are an extremely frequent target for malicious users and software. Placing scripts in these folders is an extremely easy way to ensure that malware remains persistent. For this reason, these folders should be tightly controlled. All crontab folders should have an ACL of 600 with root user and group ownership. \n\nIf this check fails, the chown command should be used to set root user and group ownership:\n\nchgrp root /etc/cron.d /etc/cron.monthly /etc/cron.weekly /etc/cron.daily /etc/cron.hourly\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/cron.hourly, /etc/cron.daily, /etc/cron.weekly, /etc/cron.monthly, /etc/cron.d", 
+            "exportable": true, 
+            "object_type": "directory_acl", 
+            "acls": "NOT: **2,**3,**6,**7", 
+            "suggestion": "The crontab folders are an extremely frequent target for malicious users and software. Placing scripts in these folders is an extremely easy way to ensure that malware remains persistent. For this reason, these folders should be tightly controlled. All crontab folders should have an ACL of 600 with root user and group ownership. \n\nIf this check fails, the chmod command should be used to set the ACL on these directories to 600:\n\nchmod 600 /etc/cron.d /etc/cron.monthly /etc/cron.weekly /etc/cron.daily /etc/cron.hourly\n", 
+            "active": true
+          }, 
+          {
+            "files": "/etc/cron.hourly/*, /etc/cron.daily/*, /etc/cron.weekly/*, /etc/cron.monthly/*, /etc/cron.d/*", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "** Note - this check may fail if you have no files in one of the /etc/cron.*/ directories; this is a cosmetic issue and not a security risk. **\n\nExecutable scripts within the crontab folders are extremely frequent targets for malicious users and software. Tampering with or over-writing scripts in these folders is an extremely easy way to ensure that malware remains persistent. For this reason, all contents of these folders should be tightly controlled. Contents of all crontab folders should have an ACL of 600 with root user and group ownership. \n\nIf this check fails, the chown command should be used to set root user and group ownership:\n\nchown -R root /etc/cron.d/* /etc/cron.monthly/* /etc/cron.weekly/* /etc/cron.daily/* /etc/cron.hourly/*\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/cron.hourly/*, /etc/cron.daily/*, /etc/cron.weekly/*, /etc/cron.monthly/*, /etc/cron.d/*", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "** Note - this check may fail if you have no files in one of the /etc/cron.*/ directories; this is a cosmetic issue and not a security risk. **\n\nExecutable scripts within the crontab folders are extremely frequent targets for malicious users and software. Tampering with or over-writing scripts in these folders is an extremely easy way to ensure that malware remains persistent. For this reason, all contents of these folders should be tightly controlled. Contents of all crontab folders should have an ACL of 600 with root user and group ownership. \n\nIf this check fails, the chown command should be used to set root group ownership:\n\nchgrp -R root /etc/cron.d/* /etc/cron.monthly/* /etc/cron.weekly/* /etc/cron.daily/* /etc/cron.hourly/*\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/cron.hourly/*, /etc/cron.daily/*, /etc/cron.weekly/*, /etc/cron.monthly/*, /etc/cron.d/*", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "NOT: **2,**3,**6,**7", 
+            "suggestion": "** Note - this check may fail if you have no files in one of the /etc/cron.*/ directories; this is a cosmetic issue and not a security risk. **\n\nExecutable scripts within the crontab folders are extremely frequent targets for malicious users and software. Tampering with or over-writing scripts in these folders is an extremely easy way to ensure that malware remains persistent. For this reason, all contents of these folders should be tightly controlled. Contents of all crontab folders should have an ACL of 600 with root user and group ownership.\n\nIf this check fails, the chmod command should be used to set the ACL on these files to 755:\n\nchmod -R 755 /etc/cron.d/* /etc/cron.monthly/* /etc/cron.weekly/* /etc/cron.daily/* /etc/cron.hourly/*\n", 
+            "active": true
+          }
+        ], 
+        "name": "Protect cron schedule directories"
+      }, 
+      {
+        "comment": "Secure shell is the most commonly used method for remote administrative access to hosted servers. That means that it's almost always open to some portion of the Internet, if not all of it. It also means that it's one of the most frequent points of server attack and needs to be well-configured.\n\n* Updated checks to use NOT: checks\nThis rule checks settings in the secure shell daemon configuration file for configuration settings that create security exposures.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "Protocol", 
+            "desired_value": "2", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Version 1 of the secure shell (ssh) protocol has a number of security issues that are addressed by version 2 of the ssh protocol. Changing the 'Protocol' setting to 2 in sshd_config will enforce use of ssh v2.\n\nHere are example commands that you may need to customize for your environment.  Either add:\nProtocol 2\nto /etc/ssh/sshd_config by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(Protocol .*\\)/#\\1/i' /etc/ssh/sshd_config\necho 'Protocol 2' | sudo tee -a /etc/ssh/sshd_config\nsudo service sshd condrestart\n", 
+            "active": true, 
+            "config_file_path": "/etc/ssh/sshd_config"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "IgnoreRhosts", 
+            "desired_value": "NOT: no", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Rhosts authentication is an insecure method of authenticating users that depends on trusting requests based on their IP address.  This option instructs the secure shell daemon to ignore any .rhosts or .shosts files found in user home directories.  When set to \"yes\", sshd ignores them, blocking users from enabling this feature for their own accounts.\n\nHere are example commands that you may need to customize for your environment.  Either add:\nIgnoreRhosts yes\nto /etc/ssh/sshd_config by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(IgnoreRhosts .*\\)/#\\1/i' /etc/ssh/sshd_config\necho 'IgnoreRhosts yes' | sudo tee -a /etc/ssh/sshd_config\nsudo service sshd condrestart\n", 
+            "active": true, 
+            "config_file_path": "/etc/ssh/sshd_config"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "HostbasedAuthentication", 
+            "desired_value": "NOT: yes", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Rhosts authentication is an insecure method of authenticating users that depends on trusting requests based on their IP address.  This (protocol 2) option disables host-based authentication with host public keys, which is only slightly more secure than trusting IP addresses for authentication.\n\nHere are example commands that you may need to customize for your environment.  Either add:\nHostbasedAuthentication no\nto /etc/ssh/sshd_config by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(HostbasedAuthentication  .*\\)/#\\1/i' /etc/ssh/sshd_config\necho 'HostbasedAuthentication no' | sudo tee -a /etc/ssh/sshd_config\nsudo service sshd condrestart\n", 
+            "active": true, 
+            "config_file_path": "/etc/ssh/sshd_config"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "RhostsRSAAuthentication", 
+            "desired_value": "NOT: yes", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Rhosts authentication is an insecure method of authenticating users that depends on trusting requests based on their IP address.  This (protocol 1) option disables host-based authentication with host public keys, which is only slightly more secure than trusting IP addresses for authentication.\n\nHere are example commands that you may need to customize for your environment.  Either add:\nRhostsRSAAuthentication no\nto /etc/ssh/sshd_config by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(RhostsRSAAuthentication  .*\\)/#\\1/i' /etc/ssh/sshd_config\necho 'RhostsRSAAuthentication no' | sudo tee -a /etc/ssh/sshd_config\nsudo service sshd condrestart\n", 
+            "active": true, 
+            "config_file_path": "/etc/ssh/sshd_config"
+          }
+        ], 
+        "name": "Evaluate secure shell daemon (sshd) config"
+      }, 
+      {
+        "comment": "Some services are simply dangerous to run on any server. The need for services checked in this rule should be carefully weighted against potential exposures.\n\nIMPORTANT: Many people discount these services as outdated and highly unlikely to be running. However, presence of these services -- especially if running on non-standard ports -- may indicate a low-sophistication rootkit.\n\nh1. telnet, rlogin\nThe telnet and Remote Login (rlogin) services allows OS shell access over an un-encrypted communication channel. This exposes usernames and passwords to capture at any point in the transmission (hijacked WiFi connection, local network sniffer, local malware).\n\nh1. chargen, echo, discard\nThese services are sometimes used to measure throughput and other performance characteristics. They can be abused to affect DoS locally in some cases; more often they are used to attack other server in unsophisticated DoS attacks (pingpong-style attacks, packet storms, etc). If actually used, consider other alternatives to addressing the needs served by these services.\n\nh1. TCPMUX\nAn attacker can easily enumerate services running on a server by abusing TCPMUX. This service can also allow access to services through alternate ports.\n\nh1. Quote of the Day\nThis service is used to display random phrases and quotes, sometimes for fun and sometimes used to test throughput or network performance. The service is vulnerable to pingpong style DoS attacks.\n\nh1. rexecd, rshd\nThe Remote Process Execution Daemon (rexecd) and Remote Shell Daemon (rshd) allows remote execution of shell commands. It uses a cleartext (un-encrypted) communication channel, exposing usernames and passwords to any point of capture in the communication path. Using ssh instead of these services is recommended.\n\nh1. fingerd, identd\nThe finger and ident protocols enumerate users active on a server. This information is used to determine usage patterns, accounts to target for brute-force and other attacks, and to detect when specific individuals or processes are active on a server.\n\nh1. netdump, netcrashdump, netconsole\nThese services provide functionality for kernel logging and debugging to remote servers. If they are not actively used by authorized personnel, their presence is risky. Unexpected presence may represent compromise (e.g. attackers can remotely collect core-dumps and kernel errors to refine a memory-overflow attack).", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "malicious_software", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "processes": "telnet, chargen, echo, discard, tcpmux, qotd, rexecd, rshd, fingerd, identd, netdump, netcrashdump, netconsole", 
+            "exportable": true, 
+            "object_type": "process_presence", 
+            "suggestion": "Unless explicitly in use, any process identified by this check should be disabled. If there is a legitimate need for a process identified in this check, an alternative should be identified and the dangerous process should be replaced.", 
+            "active": true, 
+            "present": "false"
+          }
+        ], 
+        "name": "Find dangerous/subverted processes"
+      }, 
+      {
+        "comment": "SSHs cryptographic host-based authentication is slightly more secure than .rhosts authentication, since hosts are cryptographically authenticated. However, it is not recommended that hosts unilaterally trust one another, even within an organization. If a trusted host were to be compromised the use of host-based authentication would extend the scope of impact to any server trusting the originally breached server.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "HostbasedAuthentication", 
+            "desired_value": "NOT: yes", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Set the HostbasedAuthentication setting to \"no\" in the sshd service configuration file (NOTE: this need to be in the sshd_config file, NOT ssh_config which applies only to the ssh client).\n\nHere are example commands that you may need to customize for your environment.  Either add:\nHostbasedAuthentication no\nto /etc/ssh/sshd_config by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(HostbasedAuthentication .*\\)/#\\1/i' /etc/ssh/sshd_config\necho 'HostbasedAuthentication yes' | sudo tee -a /etc/ssh/sshd_config\nsudo service sshd condrestart\n", 
+            "active": true, 
+            "config_file_path": "/etc/ssh/sshd_config"
+          }
+        ], 
+        "name": "Disable host-based authentication"
+      }, 
+      {
+        "comment": "IP source-routing enables the source of an IP connection to specify a route through the IP network. Source-routing is very rarely required and is a well-known security risk that can enable an attacker to bypass firewalls, IDS/IPS and other security controls.\n\n*change the location to the proc*\nIf the server is not explicitly using IP source routing it should be disabled.\n", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "network_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "", 
+            "desired_value": "0", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": "", 
+            "suggestion": "IP source-routing enables the source of an IP connection to specify a route through the IP network. Source-routing is very rarely required and is a well-known security risk that can enable an attacker to bypass firewalls, IDS/IPS and other security controls.\n\nIf the server is not explicitly using IP source routing it should be disabled.\n\nHere is an example command that you may need to customize for your environment.  \necho '0' | sudo tee -a  /proc/sys/net/ipv4/conf/all/accept_source_route\n", 
+            "active": true, 
+            "config_file_path": "/proc/sys/net/ipv4/conf/all/accept_source_route"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "net.ipv4.conf.all.accept_source_route", 
+            "desired_value": "NOT: 1", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": "=", 
+            "suggestion": "IP source-routing enables the source of an IP connection to specify a route through the IP network. Source-routing is very rarely required and is a well-known security risk that can enable an attacker to bypass firewalls, IDS/IPS and other security controls.\n\nIf the server is not explicitly using IP source routing it should be disabled.\n\nHere are example commands that you may need to customize for your environment.  Either add:\nnet.ipv4.conf.all.accept_source_route = 0\nto /etc/sysctl.conf by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(net.ipv4.conf.all.accept_source_route .*\\)/#\\1/i' /etc/sysctl.conf\necho 'net.ipv4.conf.all.accept_source_route = 0' | sudo tee -a /etc/sysctl.conf\n", 
+            "active": true, 
+            "config_file_path": "/etc/sysctl.conf"
+          }
+        ], 
+        "name": "IP source routing is disabled"
+      }, 
+      {
+        "comment": "A system event logging service (typically syslog, syslog-ng,  or rsyslog) should always be running. Without one of these services, attackers can almost certainly abuse the system without logging of their actions. System logging is also almost always a legal or regulatory requirement. This rule can be configured to look for syslog, syslog-ng, or rsyslog by activating the correct check for the logging service that you use, and deactivating the checks for the two that you do not use (check \"Active\" for the logging service you use and uncheck \"Active\" for the others). This rule assumes use of the more secure syslog-ng service, which is used by default in many popular cloud environments.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "processes": "rsyslogd", 
+            "exportable": true, 
+            "object_type": "process_presence", 
+            "suggestion": "**** If you are running a logging daemon other than rsyslog, this check will fail.  Please edit this policy and uncheck \"Active\" next to rsyslog and check \"Active\" for your logging software. ****\n\nThe most common Linux logging services are syslog, syslog-ng and rsyslog. Only one needs to be running, and one is always enabled by default. If none of these service processes is running, one should be enabled. Unless there is a known reason why the services were disabled, the system should be assumed to be compromised.\n\nThis rule assumes the more secure rsyslog service is in use, which is used by default in more recent Linux distributions. This rule should be adjusted if a different logging program is used.\n\nTo enable rsyslog, run the following commands (which may need to be adjusted for your environment):\nchkconfig rsyslog on\nservice rsyslog start\n", 
+            "active": true, 
+            "present": "true"
+          }, 
+          {
+            "processes": "syslog-ng", 
+            "exportable": true, 
+            "object_type": "process_presence", 
+            "suggestion": "**** If you are running a logging daemon other than syslog-ng, this check will fail.  Please edit this policy and uncheck \"Active\" next to syslog-ng and check \"Active\" for your logging software. ****\n\nThe most common Linux logging services are syslog, syslog-ng, and rsyslog. Only one needs to be running, and one is always enabled by default. If none of these service processes is running, one should be enabled. Unless there is a known reason why the services were disabled, the system should be assumed to be compromised.\n\nThis rule assumes the more secure syslog-ng service is in use, which is used by default in popular Cloud services. This rule should be adjusted if a different logging program is used.\n\nTo enable syslog-ng, run the following commands (which may need to be adjusted for your environment):\nchkconfig syslog-ng on\nservice syslog-ng start\n", 
+            "active": false, 
+            "present": "true"
+          }, 
+          {
+            "processes": "syslogd", 
+            "exportable": true, 
+            "object_type": "process_presence", 
+            "suggestion": "**** If you are running a logging daemon other than syslogd, this check will fail.  Please edit this policy and uncheck \"Active\" next to syslogd and check \"Active\" for your logging software. ****\n\nThe most common Linux logging services are syslog, syslog-ng, and rsyslog. Only one needs to be running, and one is always enabled by default. If none of these service processes is running, one should be enabled. Unless there is a known reason why the services were disabled, the system should be assumed to be compromised.\n\nThis rule assumes the original syslog service is in use, which is used by default in older Linux distributions. This rule should be adjusted if a different logging program is used.\n\nTo enable syslog, run the following commands (which may need to be adjusted for your environment):\nchkconfig sysklogd on\nservice sysklogd start\n", 
+            "active": false, 
+            "present": "true"
+          }
+        ], 
+        "name": "Logging services should be running"
+      }, 
+      {
+        "comment": "The host.equiv files control logins from trusted remote hosts without authentication. This practice is discouraged in general, as the functionality can serve as a blunt but effective back-door into a system. When combined with IP spoofing techniques, it can also be abused to issue remote shell commands even if the server is behind a firewall.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "other", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "files": "/etc/hosts.equiv", 
+            "exportable": true, 
+            "object_type": "file_presence", 
+            "suggestion": "If the /etc/hosts.equiv file is present it should be analyzed to determine its use. If it is being used in an authorized manner, a more secure means of remote shell access is strongly recommended. The use of ssh with certificate-based authentication is one such option. If there are entries in the hosts.equiv file that look suspicious or have not been created by authorized users, system compromise should be assumed.", 
+            "active": true, 
+            "present": false
+          }
+        ], 
+        "name": "Disallow use of hosts.equiv"
+      }, 
+      {
+        "comment": "The rhosts file permits logins from trusted remote hosts without authentication. While this practice is discouraged in general, it is extremely dangerous for root users and can be used as a blunt but effective back-door into a system. When combined with IP spoofing techniques, it can also be abused to issue remote shell commands as root even if the server is behind a firewall.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "other", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "files": "/root/.rhosts, /root/rhosts", 
+            "exportable": true, 
+            "object_type": "file_presence", 
+            "suggestion": "If the root user has the .rhost file present in root home directory, it should be removed. If this file was not explicitly placed here by an authorized user, system compromise should be assumed.", 
+            "active": true, 
+            "present": false
+          }
+        ], 
+        "name": "Disallow use of rhosts by root user"
+      }, 
+      {
+        "comment": "Enabling forwarding of packets between network interfaces creates a routing function within a server. This functionality can be abused to create or further attacks and can create highly threatening vectors (e.g. a cloud server routing an Internet-accessible interface to the internal enterprise over a VPN interface). In almost all cases, IP routing should be explicitly disabled.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "network_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "net.ipv4.ip_forward", 
+            "desired_value": "NOT: 1", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": "=", 
+            "suggestion": "Enabling forwarding of packets between network interfaces creates a routing function within a server. This functionality can be abused to create or further attacks and can create highly threatening vectors.\n\nIf this check fails and routing is not explicitly required, change the value of net.ipv4.ip_forward to the integer 0 to explicitly disable IP routing. This is especially important if the server has both Internet-facing and private internally-facing interfaces.\n\nHere are example commands that you may need to customize for your environment.  Either add:\nnet.ipv4.ip_forward = 0\nto /etc/sysctl.conf by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(net.ipv4.ip_forward .*\\)/#\\1/i' /etc/sysctl.conf\necho 'net.ipv4.ip_forward = 0' | sudo tee -a /etc/sysctl.conf\n", 
+            "active": true, 
+            "config_file_path": "/etc/sysctl.conf"
+          }, 
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "", 
+            "desired_value": "0", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": "", 
+            "suggestion": "Enabling forwarding of packets between network interfaces creates a routing function within a server. This functionality can be abused to create or further attacks and can create highly threatening vectors.\n\nIf this check fails and routing is not explicitly required, change the value of net.ipv4.ip_forward to the integer 0 to explicitly disable IP routing. This is especially important if the server has both Internet-facing and private internally-facing interfaces.\n\nHere is an example command that you may need to customize for your environment:\necho '0' | sudo tee /proc/sys/net/ipv4/ip_forward\n", 
+            "active": true, 
+            "config_file_path": "/proc/sys/net/ipv4/ip_forward"
+          }
+        ], 
+        "name": "Disable IP routing"
+      }, 
+      {
+        "comment": "The /etc/passwd file contains system and user account information that can be used to compromise a system. Access to this file should be tightly controlled. A mode of 644 with root ownership is appropriate.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "files": "/etc/passwd", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "Use the chown command to change user and group ownership of /etc/passwd to root. Example (may vary based on system):\n\nsudo chown root /etc/passwd", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/passwd", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "Use the chown command to change user and group ownership of /etc/passwd to root. Example (may vary based on system):\n\nsudo chgrp root /etc/passwd", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/passwd", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "644", 
+            "suggestion": "Use the chmod command to change the ACL of /etc/passwd to 644. Example (may vary based on system):\n\nsudo chmod 644 /etc/passwd", 
+            "active": true
+          }, 
+          {
+            "files": "/etc/shadow", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "Use the chown command to change user and group ownership of /etc/shadow to root. Example (may vary based on system):\n\nsudo chown root /etc/shadow", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/shadow", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "Use the chown command to change user and group ownership of /etc/shadow to root. Example (may vary based on system):\n\nsudo chgrp root /etc/shadow", 
+            "active": false, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/shadow", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "NOT: 1**,2**,3**,5**,6**,7**,*1*,*2*,*3*,*4*,*5*,*6*,*7*,**1,**2,**3,**4,**5,**6,**7", 
+            "suggestion": "Use the chmod command to change the ACL of /etc/shadow to 400. Some systems may require an ACL of 600. Refer to your system documentation to determine minimal ACL required. \n\nExample (may vary based on system):\n\nsudo chmod 400 /etc/shadow", 
+            "active": false
+          }, 
+          {
+            "files": "/etc/shadow", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "On Ubuntu/Debian systems, use the chown command to change user and group ownership of /etc/shadow to shadow. Example (may vary based on system):\n\nsudo chgrp shadow /etc/shadow", 
+            "active": true, 
+            "owned_by": "shadow"
+          }, 
+          {
+            "files": "/etc/shadow", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "NOT: 1**,2**,3**,5**,7**,*1*,*2*,*3*,*5*,*6*,*7*,**1,**2,**3,**4,**5,**6,**7", 
+            "suggestion": "On Ubuntu/Debian systems, use the chmod command to change the ACL of /etc/shadow to 640. Refer to your system documentation to determine minimal ACL required. \n\nExample (may vary based on system):\n\nsudo chmod 640 /etc/shadow", 
+            "active": true
+          }
+        ], 
+        "name": "/etc/passwd and /etc/shadow ownership and permissions"
+      }, 
+      {
+        "comment": "All users accounts should have passwords, even if certificates or other authentication methods are used.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "active": true, 
+            "object_type": "user_has_password", 
+            "exportable": true, 
+            "users": "ALL", 
+            "suggestion": "If a user account does not have a password one should be set at once. Unless there is explicit knowledge of an account being created or modified with no password, any such accounts should be investigated with the assumption of compromise.\n\nTo set a password for a given account, log in as root and run:\npasswd {account_name}\n"
+          }
+        ], 
+        "name": "Identify user accounts with no passwords"
+      }, 
+      {
+        "comment": "Linux system log files require strict permissions to prevent malicious or accidental changes. Unauthorized individuals and malicious software very often abuse excessive log file privileges to obfuscate damaging activities. Also, certain logs contain sensitive data that should only be available to the System Administrator.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "files": "/var/log/cron, /var/log/secure, /var/log/messages", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "600", 
+            "suggestion": "These log files contain sensitive log event information related to a number of system functions, including several that are security-related.\n\nThese log files should be tightly controlled to prevent malicious or accidental changes. \n\nHere is an example command that you may need to customize for your environment:\nchmod 600 /var/log/{cron,messages,secure}\n", 
+            "active": false
+          }, 
+          {
+            "files": "/var/log/messages, /var/log/cron, /var/log/secure", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "These log files contain sensitive log event information related to a number of system functions, including several that are security-related.\n\nSystem log files should be tightly controlled to prevent malicious or accidental changes.\n\nHere is an example command that you may need to customize for your environment:\nchown root /var/log/{cron,messages,secure}", 
+            "active": false, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/var/log/cron, /var/log/secure, /var/log/messages", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "These log files contain sensitive log event information related to a number of system functions, including several that are security-related.\n\nSystem log files should be tightly controlled to prevent malicious or accidental changes.\n\nHere is an example command that you may need to customize for your environment:\nchgrp root /var/log/{cron,messages,secure}\n", 
+            "active": false, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/var/log/auth.log, /var/log/syslog", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "640", 
+            "suggestion": "These log files contain sensitive log event information related to a number of system functions, including several that are security-related.\n\nThese log files should be tightly controlled to prevent malicious or accidental changes. \n\nHere is an example command that you may need to customize for your environment:\nchmod 640 /var/log/{syslog,auth.log}\n", 
+            "active": true
+          }, 
+          {
+            "files": "/var/log/auth.log, /var/log/syslog", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "These log files contain sensitive log event information related to a number of system functions, including several that are security-related.\n\nSystem log files should be tightly controlled to prevent malicious or accidental changes.\n\nHere is an example command that you may need to customize for your environment:\nchown syslog /var/log/{syslog,auth.log}\n", 
+            "active": true, 
+            "owned_by": "syslog"
+          }, 
+          {
+            "files": "/var/log/auth.log, /var/log/syslog", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "These log files contain sensitive log event information related to a number of system functions, including several that are security-related.\n\nSystem log files should be tightly controlled to prevent malicious or accidental changes.\n\nHere is an example command that you may need to customize for your environment:\nchgrp adm /var/log/{syslog,auth.log}\n", 
+            "active": true, 
+            "owned_by": "adm"
+          }
+        ], 
+        "name": "Protect critical system log files"
+      }, 
+      {
+        "comment": "The root user should never be allowed to login directly over a network, as this both reduces auditable information about who ran privileged commands on the system and allows direct attack attempts on roots password.\n\n*This rule is initially marked inactive because most cloud images come with direct root SSH login enabled. We recommend activating this rule to prevent remote root login.*", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": false, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "PermitRootLogin", 
+            "desired_value": "NOT: yes", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "If the PermitRootLogin setting is enabled, it should be commented out or set to \"no\" to prevent remote root login. Logging into a server with individual user accounts and then using sudo commands is the preferred method for accessing privileged administrative rights.\n\n\nHere are example commands that you may need to customize for your environment.  Either add:\nPermitRootLogin no\nto /etc/ssh/sshd_config by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(PermitRootLogin .*\\)/#\\1/i' /etc/ssh/sshd_config\necho 'PermitRootLogin no' | sudo tee -a /etc/ssh/sshd_config\nsudo service sshd condrestart\n", 
+            "active": true, 
+            "config_file_path": "/etc/ssh/sshd_config"
+          }
+        ], 
+        "name": "Disable root login via SSH"
+      }, 
+      {
+        "comment": "The PermitEmptyPasswords option specifies whether the server allows login to accounts with a null password. This is an extremely high-risk practice that could lead to gross server compromise.\n\n*changed to NOT:yes from no*", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "PermitEmptyPasswords", 
+            "desired_value": "NOT: yes", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "The PermitEmptyPasswords option specifies whether the server allows login to accounts with a null password. This is an extremely high-risk practice that could lead to gross server compromise.\n\nHere are example commands that you may need to customize for your environment.  Either add:\nPermitEmptyPasswords no\nto /etc/ssh/sshd_config by hand, or copy and paste these commands:\nsudo sed -i -e 's/#*\\(PermitEmptyPasswords .*\\)/#\\1/i' /etc/ssh/sshd_config\necho 'PermitEmptyPasswords no' | sudo tee -a /etc/ssh/sshd_config\nsudo service sshd condrestart\n", 
+            "active": true, 
+            "config_file_path": "/etc/ssh/sshd_config"
+          }
+        ], 
+        "name": "Prevent sshd login to accounts with null passwords"
+      }, 
+      {
+        "comment": "The init startup scripts control what services are started at boot-time and how they are initialized. Access to change these files should be minimal. On Redhat based systems, these files are located in the /etc/rc.d/init.d directory, and on Debian/Ubuntu based systems these are in /etc/init.d .  Since Redhat includes a symlink to /etc/init.d, we do our checks on /etc/init.d to work across platforms.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "system_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "folders": "/etc/init.d", 
+            "exportable": true, 
+            "object_type": "directory_user_ownership", 
+            "suggestion": "The chown command should be used to change file and group ownership to root. Example (may vary depending on system configuration):\n\nsudo chown root /etc/init.d\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/init.d", 
+            "exportable": true, 
+            "object_type": "directory_acl", 
+            "acls": "NOT: **2,**3,**6,**7", 
+            "suggestion": "The chmod command should be used to set the directory ACL to 755. Example (may vary depending on system configuration):\n\nsudo chmod 755 /etc/init.d\n", 
+            "active": true
+          }, 
+          {
+            "files": "/etc/init.d/*", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "The chown command should be used to change file and group ownership to root. Example (may vary depending on system configuration):\n\nsudo chown -R root:root /etc/init.d/*\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/init.d/*", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "NOT: **2,**3,**6,**7", 
+            "suggestion": "The chmod command should be used to set init file ACLs to 755. Example (may vary depending on system configuration):\n\nsudo chmod -R 755 /etc/init.d/*\n", 
+            "active": true
+          }, 
+          {
+            "files": "/etc/init.d", 
+            "exportable": true, 
+            "object_type": "directory_group_ownership", 
+            "suggestion": "Use the chown command to change user and group ownership of /etc/passwd to root. Example (may vary based on system):\n\nsudo chgrp root /etc/init.d", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/init.d/*", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "Use the chown command to change user and group ownership of /etc/passwd to root. Example (may vary based on system):\n\nsudo chgrp root /etc/init.d/*", 
+            "active": true, 
+            "owned_by": "root"
+          }
+        ], 
+        "name": "/etc/init.d ownership and permissions"
+      }
+    ], 
+    "id": "a68eb790dbec013270bd3c764e10c220", 
+    "description": "This policy checks that the most critical security settings are in place for common versions of Ubuntu (and other Debian-based) Linux distributions."
+  }
+}

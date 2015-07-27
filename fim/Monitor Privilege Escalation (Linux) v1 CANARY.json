@@ -1,0 +1,532 @@
+{
+  "policy": {
+    "name": "Apache (Debian-based Linux) v2 CS", 
+    "url": "https://api.cloudpassage.com/v1/policies/78de31b0dbec0132fdd83c764e10c221", 
+    "used_by": [
+      {
+        "id": "795fe080dbeb013270bc3c764e10c220", 
+        "name": "Apache Proxy"
+      }
+    ], 
+    "platform": "linux", 
+    "rules": [
+      {
+        "comment": "---- Note: Because of the complexity of managing a chroot environment, this is an optional rule.  If you choose to use Apache's mod_security and its SecChrootDirective, check \"Active\" for this rule. ----\r\n\r\nSome services are capable of running in a chroot \"jail\" which means the root filesystem directory of the process is isolated. This helps segregate processes that are more exposed to compromise from the rest of the operating system. You can learn more about chroot jails at: \r\nhttp://en.wikipedia.org/wiki/Chroot_jail\r\n\r\nPutting Apache in a chroot jail isolates an intruder's scope of access in the event that the Apache web server is compromised. Depending on the configuration of the SecChrootDir option, the web server's scope of filesystem access can be tightly restricted to a small section of the filesystem.\r\n\r\nThe checks below are configured for Apache 2.0, but even within the 2.x releases the chroot jail directives and usage can vary. Refer to the Apache docs for usage specific to your environment and adjust the checks below accordingly:\r\nhttp://httpd.apache.org/docs", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": false, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "SecChrootDir", 
+            "desired_value": "/chroot/apache", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "In order to configure Apache to run from a chroot directory, you will need to install the mod_security Apache module.  If you're using your vendor's precompiled Apache, this may be as easy as \r\napt-get install mod_security\r\nor\r\nyum install mod_security\r\n\r\nNext, edit the Apache configuration file, /etc/apache2/apache2.conf, and add the directive:\r\n\r\nSecChrootDir /chroot/apache\r\n\r\nAlternatively you can create a shell script with the following commands to make these changes:\r\nsudo sed -i -e 's/#*\\(SecChrootDir .*\\)/#\\1/i' /etc/apache2/apache2.conf\r\n#Append a new line at the end with our preferred key and value\r\necho 'SecChrootDir /chroot/apache' | sudo tee -a /etc/apache2/apache2.conf\r\n#Restart the service if it was already running, leave stopped if not.\r\nsudo service apache2 condrestart\r\n\r\nThe chroot directory should obviously exist and should be owned by an isolated user and group. Ownership and ACL of this directory should be minimal, and in most cases the chroot directories should not be writable by the web server process user or group.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/apache2.conf"
+          }
+        ], 
+        "name": "Apache chroot jail"
+      }, 
+      {
+        "comment": "Apache has several directives that allow you to limit the size of a request which can be useful for mitigating the effects of a denial of service attack. \r\n\r\nHowever, since there is no universally accepted request size which can be considered safe for all environments, this rule is disabled by default. If you know what number to limit the request body size to in your environment, please put in the desired value in the field below and activate this rule.\r\n\r\nSome other directives to look at are LimitRequestFields, LimitRequestFieldSize and LimitRequestLine. These directives are set to a reasonable defaults for most servers, but you may want to tweak them to best fit your needs. See the documentation for more information.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": false, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LimitRequestBody", 
+            "desired_value": "1048576", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Large inbound requests to a web server are a common means of affecting or amplifying a denial of service attack. Web servers should limit the size of inbound requests to a reasonable level for your specific server configuration.\r\n\r\nFor an Apache server the LimitRequestBody directive is used to limit requests to a certain number of bytes. By default, request sizes are unlimited.\r\n\r\nIMPORTANT NOTE: The suggested size of 1MB above may not be appropriate for all web servers, especially those that accept uploads. Please adjust this policy and your web server configuration(s) accordingly.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/apache2.conf"
+          }
+        ], 
+        "name": "Limit large requests"
+      }, 
+      {
+        "comment": "Server Side Includes provide a method of dynamically generating web pages through the insertion of server-side\r\ncode. However, the technology is deprecated and introduces significant security exposures.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LoadModule include_module", 
+            "desired_value": "NOT: /usr/lib/apache2/modules/mod_include.so", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "The server side include module (mod_include) should be disabled unless explicitly needed by commenting out its LoadModule directive.\r\nIf SSI is actually required for an application, alternate methods of delivering the same functionality should be considered. If SSI is absolutely required with no alternative, the security of the SSI code itself and the rights of the web server processes (which should be minimal) need extremely close scrutiny.\r\n\r\n\r\nHere are example commands that you may need to customize for your environment.  Either:\r\nAdd # to the beginning of LoadModule include_module modules/mod_include.so in /etc/apache2/apache2.conf by hand, or \r\nCopy and paste these commands:\r\nsudo sed -i 's|LoadModule include_module modules/mod_include.so|#LoadModule include_module modules/mod_include.so|' /etc/apache2/apache2.conf\r\nsudo service apache2 condrestart\r\n\r\nTo verify that the module isn't loaded anymore, use the command: apache2 -M.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/include.load"
+          }
+        ], 
+        "name": "Disable Server Side Includes"
+      }, 
+      {
+        "comment": "The cache_module allows Apache to cache data, optimizing access to frequently accessed content. However, not only\r\nis it an experimental module, but it also introduces potential security flaws into the web server such as the possibility of circumventing Allow and Deny directives. If not explicitly required, the cache_module on the server should be disabled.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LoadModule cache_module", 
+            "desired_value": "NOT: /usr/lib/apache2/modules/mod_cache.so", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "If sensitive content is being served by the web server and is protected by HTTP Allow and Deny directives, HTTP caching on the server should be disabled. This module is also experimental as of this writing. Use of experimental modules introduces many unknowns that could be detrimental.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either:\r\nAdd # to the beginning of LoadModule cache_module modules/mod_cache.so in /etc/apache2/apache2.conf by hand, or \r\nCopy and paste these commands:\r\nsudo sed -i 's|LoadModule cache_module modules/mod_cache.so|#LoadModule cache_module modules/mod_cache.so|' /etc/apache2/apache2.conf\r\nsudo service apache2 condrestart\r\n\r\nTo verify that the module isn't loaded anymore, use the command: apache2 -M\r\n\r\n\r\n\r\n\r\nYou can deactivate this feature by commenting out the following line in the /etc/apache2/apache2.conf file:\r\n\r\nLoadModule cache_module modules/mod_cache.so\r\n\r\nYou can comment out the line by inserting an '#' at the beginning of the line so that it looks like:\r\n\r\n#LoadModule cache_module modules/mod_cache.so\r\n\r\nAfter modifying the file and saving it you should restart the Apache server in order for the changes to take effect.\r\n\r\nAlternatively you can create a shell script with the following commands to make these changes:\r\nsudo sed -i -e 's/#*.LoadModule cache_module.*\\)/#\\1/i' /etc/apache2/apache2.conf\r\n#Append a new line at the end with our preferred key and value\r\necho '#LoadModule cache_module modules/mod_cache.so' | sudo tee -a /etc/apache2/apache2.conf\r\n#Restart the service if it was already running, leave stopped if not.\r\nsudo service apache2 condrestart", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/cache.load"
+          }
+        ], 
+        "name": "Disable Apache caching support"
+      }, 
+      {
+        "comment": "Corruption of the Apache httpd binary by a malicious user or persistent threat automation would comprise a gross compromise of the entire server. The Apache server startup process typically runs as the root user, meaning that any malware function injected into the startup process would also run with root privileges. All copies of the Apache daemon binary should be protected closely. The checks below are configured for the default Apache 2 daemon binary location on a Debian/Ubuntu Apache distribution. Other copies of the binary should be located using the \"which\" or \"find\" commands and should be protected as well. \r\n\r\nTip: Ensuring that the correct binary is used at startup can be achieved by explicit specification of the full path to the Apache httpd binary in the httpd init script (typically located at or linked to /etc/init.d/apache2).", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "files": "/usr/sbin/apache2", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "The Apache httpd daemon binary is started up as root before privileges are reduced to the configured user/group specified in the Apache configuration file. Compromise of this binary by a malicious user or persistent threat automation would comprise a gross compromise of the entire server.\r\n\r\nThe httpd daemon should be configured for root user and group ownership with an ACL of 755.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chown root /usr/sbin/apache2\r\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/usr/sbin/apache2", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "The Apache httpd daemon binary is started up as root before privileges are reduced to the configured user/group specified in the Apache configuration file. Compromise of this binary by a malicious user or persistent threat automation would comprise a gross compromise of the entire server.\r\n\r\nThe httpd daemon should be configured for root user and group ownership with an ACL of 755.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chgrp root /usr/sbin/apache2\r\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/usr/sbin/apache2", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "NOT: *2*,*3*,*6*,*7*,**2,**3,**6,**7", 
+            "suggestion": "The Apache httpd daemon binary is started up as root before privileges are reduced to the configured user/group specified in the Apache configuration file. Compromise of this binary by a malicious user or persistent threat automation would comprise a gross compromise of the entire server.\r\n\r\nThe httpd daemon should be configured for root user and group ownership with an ACL of 755.\r\n\r\nExample command to change mode to 755 (may vary depending on system configuration):\r\nsudo chmod 755 /usr/sbin/apache2\r\n", 
+            "active": true
+          }
+        ], 
+        "name": "Protect access to Apache daemon binary"
+      }, 
+      {
+        "comment": "Unauthorized modification to the Apache configuration files can result in a gross server compromise. These directories and files should be closely protected. It should be noted that in most cases Apache starts as the root user, switching process user and group ownership to the Apache-configured parameters when the server is completely started up and ready to process requests.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "folders": "/etc/apache2, /etc/apache2/*", 
+            "exportable": true, 
+            "object_type": "directory_user_ownership", 
+            "suggestion": "This folder commonly contains configuration files for the Apache http server. If permissions on this directory are excessively permissive, a malicious local user (or a malicious remote attacker) could modify the Apache httpd server configuration. Such modifications could be disastrous to the security of not just the Apache service itself, but to the entire server.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 640 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chown -R root /etc/apache2\r\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/apache2, /etc/apache2/*", 
+            "exportable": true, 
+            "object_type": "directory_group_ownership", 
+            "suggestion": "This folder commonly contains configuration files for the Apache http server. If permissions on this directory are excessively permissive, a malicious local user (or a malicious remote attacker) could modify the Apache httpd server configuration. Such modifications could be disastrous to the security of not just the Apache service itself, but to the entire server.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 640 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chgrp -R root /etc/apache2\r\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/apache2, /etc/apache2/*", 
+            "exportable": true, 
+            "object_type": "directory_acl", 
+            "acls": "NOT: *2*,*3*,*6*,*7*,**1,**2,**3,**4,**5,**6,**7", 
+            "suggestion": "This folder commonly contains configuration files for the Apache http server. If permissions on this directory are excessively permissive, a malicious local user (or a malicious remote attacker) could modify the Apache httpd server configuration. Such modifications could be disastrous to the security of not just the Apache service itself, but to the entire server.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 750 is recommended because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\n\r\nExample command to change mode to 750 (may vary depending on system configuration):\r\nsudo chmod 750 /etc/apache2/\r\n", 
+            "active": true
+          }, 
+          {
+            "files": "/etc/apache2/*/*, /etc/apache2/*", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "Because this file is in a Apache configuration directory structure it is believed to be an Apache configuration file. If permissions on this file are excessively permissive, a malicious local user (or a malicious remote attacker) could modify the Apache httpd server configuration. Such modifications could be disastrous to the security of not just the Apache service itself, but to the entire server.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\nIf this Apache configuration file has excessively permissive access rights, they should be restricted.\r\nRoot user and group ownership with an ACL of 700 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chown -R root /etc/apache2/*\r\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/apache2/*/*, /etc/apache2/*", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "Because this file is in a Apache configuration directory structure it is believed to be an Apache configuration file. If permissions on this file are excessively permissive, a malicious local user (or a malicious remote attacker) could modify the Apache httpd server configuration. Such modifications could be disastrous to the security of not just the Apache service itself, but to the entire server.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\nIf this Apache configuration file has excessively permissive access rights, they should be restricted.\r\nRoot user and group ownership with an ACL of 660 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chgrp -R root /etc/apache2/*\r\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/etc/apache2/*/*, /etc/apache2/*", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "NOT: *1*,*2*,*3*,*5*,*6*,*7*,**1,**2,**3,**4,**5,**6,**7", 
+            "suggestion": "Because this file is in a Apache configuration directory structure it is believed to be an Apache configuration file. If permissions on this file are excessively permissive, a malicious local user (or a malicious remote attacker) could modify the Apache httpd server configuration. Such modifications could be disastrous to the security of not just the Apache service itself, but to the entire server.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\nIf this Apache configuration file has excessively permissive access rights, they should be restricted.\r\nRoot user and group ownership with an ACL of 640 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\n\r\nExample command to change mode to 640 (may vary depending on system configuration):\r\nsudo chmod 640 /etc/apache2/*\r\n", 
+            "active": true
+          }
+        ], 
+        "name": "Protect access to Apache configuration"
+      }, 
+      {
+        "comment": "This module creates a web page illustrating the configuration of the web server. This is an unnecessary information leak and should be disabled.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LoadModule info_module", 
+            "desired_value": "NOT: /usr/lib/apache2/modules/mod_info.so", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "The mod_info module can provide easy access to information that an attacker can use to learn about the server configuration. It should be disabled if not required. If there is a critical need for this module, use the Location directive to provide an access control list to restrict access to the information.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either add #:\r\nTo the beginning of LoadModule info_module modules/mod_info.so in /etc/apache2/apache2.conf by hand, or copy and paste these commands:\r\nsudo sed -i 's|LoadModule info_module modules/mod_info.so|#LoadModule info_module modules/mod_info.so|' /etc/apache2/apache2.conf\r\nsudo service apache2 condrestart\r\n\r\nTo verify that the module isn't loaded anymore, use the command: apache2 -M.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/info.load"
+          }
+        ], 
+        "name": "Disable web server configuration display"
+      }, 
+      {
+        "comment": "This module provides real-time access to statistics on the internal operation of the web server. This is an unnecessary information leak and should be disabled.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LoadModule status_module", 
+            "desired_value": "NOT: /usr/lib/apache2/modules/mod_status.so", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "If the mod_status module is enabled, it should be disabled unless explicitly needed. If it is required, the mod_status module output should be restricted to authorized IP addresses. The information provided by the mod_status module is easily leveraged by an attacker to assess the impact of various attack attempts, especially denial-of-service and buffer overflow attacks.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either add #:\r\nTo the beginning of LoadModule status_module modules/mod_status.so in /etc/apache2/apache2.conf by hand, or copy and paste these commands:\r\nsudo sed -i 's|LoadModule status_module modules/mod_status.so|#LoadModule status_module modules/mod_status.so|' /etc/apache2/apache2.conf\r\nsudo service apache2 condrestart\r\n\r\nTo verify that the module isn't loaded anymore, use the command: apache2 -M.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/status.load"
+          }
+        ], 
+        "name": "Disable server activity status"
+      }, 
+      {
+        "comment": "WebDAV is an extension of the HTTP protocol that provides distributed and collaborative access to web content. This protocol is easily misconfigured and can be abused to corrupt content or expose sensitive information to unauthorized users. Due to a number of security concerns with WebDAV, its use is not recommended.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LoadModule dav_module", 
+            "desired_value": "NOT: /usr/lib/apache2/modules/mod_dav.so", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "If WebDAV is not explicitly required, the WebDAV module should be disabled by commenting out its LoadModule directive. \r\nIf this functionality is required and no other alternative is available, its configuration should be closely scrutinized and user access control should be closely managed. The use of the WebDAV protocol to manage sensitive information is strongly discouraged. Other approaches are likely available that provide much more robust security.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either:\r\nAdd # to the beginning of LoadModule dav_module /usr/lib/apache2/modules/mod_dav.so in /etc/apache2/mods-enabled/dav.load by hand, or \r\nCopy and paste these commands:\r\nsudo sed -i 's|LoadModule dav_module /usr/lib/apache2/modules/mod_dav.so|#LoadModule dav_module /usr/lib/apache2/modules/mod_dav.so|' /etc/apache2/mods-enabled/dav.load\r\nsudo service apache2 condrestart\r\n\r\nTo verify that the module isn't loaded anymore, use the command: apache2ctl -M.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/dav.load"
+          }, 
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LoadModule dav_fs_module", 
+            "desired_value": "NOT: /usr/lib/apache2/modules/mod_dav_fs.so", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "If WebDAV is not explicitly required, the WebDAV module should be disabled by commenting out its LoadModule directive. \r\nIf this functionality is required and no other alternative is available, its configuration should be closely scrutinized and user access control should be closely managed. The use of the WebDAV protocol to manage sensitive information is strongly discouraged. Other approaches are likely available that provide much more robust security.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either:\r\nAdd # to the beginning of LoadModule dav_fs_module /usr/lib/apache2/modules/mod_dav_fs.so in /etc/apache2/mods-enabled/dav_fs.load by hand, or \r\nCopy and paste these commands:\r\nsudo sed -i 's|LoadModule dav_fs_module /usr/lib/apache2/modules/mod_dav_fs.so|#LoadModule dav_fs_module /usr/lib/apache2/modules/mod_dav_fs.so|' /etc/apache2/mods-enabled/dav_fs.load\r\nsudo service apache2 condrestart\r\n\r\nTo verify that the module isn't loaded anymore, use the command: apache2ctl -M.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/dav_fs.load"
+          }
+        ], 
+        "name": "Disable WebDAV"
+      }, 
+      {
+        "comment": "This module provides a second layer of MIME support that in most configurations is likely extraneous. As a general rule of thumb, explicit MIME handling should be used.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LoadModule mime_module", 
+            "desired_value": "NOT: /usr/lib/apache2/modules/mod_mime.so", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Unless the MIME magic module is explicitly required, it should be disabled.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either:\r\n\r\nAdd # to the beginning of LoadModule mime_magic_module modules/mod_mime_magic.so in /etc/apache2/apache2.conf by hand, or \r\n\r\nCopy and paste these commands:\r\n\r\nsudo sed -i 's|LoadModule mime_magic_module modules/mod_mime_magic.so|#LoadModule mime_magic_module modules/mod_mime_magic.so|' /etc/apache2/apache2.conf\r\nsudo service apache2 condrestart\r\n\r\nTo verify that the module isn't loaded anymore, use the command: apache2ctl -M\r\n", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/mime.load"
+          }, 
+          {
+            "files": "/etc/apache2/mods-enabled/mime.load", 
+            "exportable": true, 
+            "object_type": "file_presence", 
+            "suggestion": "", 
+            "active": true, 
+            "present": false
+          }
+        ], 
+        "name": "Disable MIME Magic"
+      }, 
+      {
+        "comment": "The ServerTokens and ServerSignature directives determine how much information the web server discloses\r\nabout the configuration of the system. ServerTokens Prod restricts information in page headers, returning only\r\nthe word Apache. ServerSignature Off keeps Apache from displaying the server version on error pages. It is a good security practice to limit the information provided to clients.\r\n\r\nNOTE: After version 2.0.44, the details of the Apache server version number presented are controlled by the ServerTokens directive. Prior to this version, the ServerSignature directive is used to control information presented in the server signature.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "ServerTokens", 
+            "desired_value": "Prod", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "The ServerTokens directive is often configured to be excessive in sharing information about the Apache web server with the outside world. This is one of the most common vectors for probing web services and underlying servers for information that can be used to launch an attack.\r\n\r\nThe ServerTokens directive should almost always be set to the \"Prod\" setting to absolutely minimize the information accessible to potential attackers.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/apache2.conf"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "ServerSignature", 
+            "desired_value": "Off", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "The ServerSignature directive is often configured to be excessive in sharing information about the Apache web server with the outside world. This is one of the most common vectors for probing web services and underlying servers for information that can be used to launch an attack.\r\n\r\nIn production environments, the ServerSignature directive should almost always be set to the \"Off\" setting to absolutely minimize the information accessible to potential attackers.\r\n\r\nNOTE: After version 2.0.44, the details of the Apache server version number presented are controlled by the ServerTokens directive. Prior to this version, the ServerSignature directive is used to control information presented in the server signature.", 
+            "active": false, 
+            "config_file_path": "/etc/apache2/apache2.conf"
+          }
+        ], 
+        "name": "Prevent ServerTokens and ServerSignature information leakage"
+      }, 
+      {
+        "comment": "Web server processes are frequently hijacked and exploited to gain access to underlying server environments. If web server processes are running with high privileges, these exploits can be devastating. The Apache web server process should be owned by a user and group with tightly controlled access.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "User", 
+            "desired_value": "NOT: root", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": "", 
+            "suggestion": "In order to ensure that the child processes Apache launches are owned by a user other than root, we check the User directive for the default Apache user.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/apache2.conf"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "Group", 
+            "desired_value": "NOT: root", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": "", 
+            "suggestion": "In order to ensure that the child processes Apache launches are owned by a group other than root (or wheel), we check the Group directive for the default Apache group.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/apache2.conf"
+          }
+        ], 
+        "name": "Apache process owner/group should be restricted"
+      }, 
+      {
+        "comment": "The UserDir directive provides user-specific directory translation, allowing content to be served directly from all users' home directories. This creates a highly controlled content-serving environment (especially if directory options are allowed within user .htaccess files). Even if users are not serving content from their home directories, this option allows an attacker to enumerate usernames on the system which greatly improves targeting of brute-force access attempts. Disabling user home directory content serving is strongly recommended.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "", 
+            "exportable": true, 
+            "config_item": "LoadModule userdir_module", 
+            "desired_value": "NOT: /usr/lib/apache2/modules/mod_userdir.so", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Enabling the mod_userdir functionality exposes the web server to a highly uncontrolled content environment and enumeration of system user accounts.\r\n\r\nDisable the userdir_module by commenting out its LoadModule directive in the Apache configuration file.\r\n\r\nHere are example commands that you may need to customize for your environment.  Either add #:\r\nTo the beginning of LoadModule userdir_module modules/mod_userdir.so in /etc/apache2/apache2.conf by hand, or copy and paste these commands:\r\nsudo sed -i 's|LoadModule userdir_module modules/mod_userdir.so|#LoadModule userdir_module modules/mod_userdir.so|' /etc/apache2/apache2.conf\r\nsudo service apache2 condrestart\r\n\r\nTo verify that the module isn't loaded anymore, use the command: apache2 -M.", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/userdir.load"
+          }
+        ], 
+        "name": "Disable serving content from user home directories"
+      }, 
+      {
+        "comment": "Unauthorized modification to the Apache log files can enable a malicious user or automation to obfuscate its activities. This is an extremely common persistent-threat tactic if a web server has been compromised. The Apache log directories and files should be closely protected.\r\n\r\nThe checks below assume the default location for Apache 2 files on a Debian/Ubuntu distribution (/var/log/apache2). The checks should be adjusted if your servers do not use these defaults. If you utilize Apache virtual hosts that use separate logging locations, additional directory and file checks should be added to ensure their protection.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": true, 
+        "active": true, 
+        "checks": [
+          {
+            "folders": "/var/log/apache2/*, /var/log/apache2", 
+            "exportable": true, 
+            "object_type": "directory_user_ownership", 
+            "suggestion": "This folder commonly contains log files for the Apache http server. If permissions on this directory are excessively permissive, a malicious user or automation could mask their activities by tampering with the logs. In addition, the ability to view Apache logs can leak information to attackers that can accelerate and/or amplify other exposures. The ability to view web log files can be used to gather intelligence on the effectiveness of attacks vectored to Apache.\r\n\r\nThe configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 640 is recommended. Because the Apache startup process typically runs with root privileges and is able to initially open and establish a handle to the root-owned files.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chown -R root /var/log/apache2\r\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/var/log/apache2/*, /var/log/apache2", 
+            "exportable": true, 
+            "object_type": "directory_group_ownership", 
+            "suggestion": "This folder commonly contains log files for the Apache http server. If permissions on this directory are excessively permissive, a malicious user or automation could mask their activities by tampering with the logs. In addition, the ability to view Apache logs can leak information to attackers that can accelerate and/or amplify other exposures. The ability to view web log files can be used to gather intelligence on the effectiveness of attacks vectored to Apache.\r\n\r\nThe configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 640 is recommended. Because the Apache startup process typically runs with root privileges and is able to initially open and establish a handle to the root-owned files.\r\n\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chgrp -R adm /var/log/apache2\r\n", 
+            "active": true, 
+            "owned_by": "adm"
+          }, 
+          {
+            "files": "/var/log/apache2/*, /var/log/apache2", 
+            "exportable": true, 
+            "object_type": "directory_acl", 
+            "acls": "NOT: *2*,*3*,*6*,*7*,**1,**2,**3,**4,**5,**6,**7", 
+            "suggestion": "This folder commonly contains log files for the Apache http server. If permissions on this directory are excessively permissive, a malicious user or automation could mask their activities by tampering with the logs. In addition, the ability to view Apache logs can leak information to attackers that can accelerate and/or amplify other exposures. The ability to view web log files can be used to gather intelligence on the effectiveness of attacks vectored to Apache.\r\n\r\nThe configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 750 is recommended. Because the Apache startup process typically runs with root privileges and is able to initially open and establish a handle to the root-owned files.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 750 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\nExample command to change mode to 750 (may vary depending on system configuration):\r\nsudo chmod 750 /var/log/apache2\r\n", 
+            "active": true
+          }, 
+          {
+            "files": "/var/log/apache2/*", 
+            "exportable": true, 
+            "object_type": "file_user_ownership", 
+            "suggestion": "This folder commonly contains log files for the Apache http server. If permissions on this directory are excessively permissive, a malicious user or automation could mask their activities by tampering with the logs. In addition, the ability to view Apache logs can leak information to attackers that can accelerate and/or amplify other exposures. The ability to view web log files can be used to gather intelligence on the effectiveness of attacks vectored to Apache.\r\n\r\nThe configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 700 is recommended. Because the Apache startup process typically runs with root privileges and is able to initially open and establish a handle to the root-owned files.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\nIf this Apache configuration file has excessively permissive access rights, they should be restricted.\r\nRoot user and group ownership with an ACL of 700 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chown -R root /var/log/apache2/*\r\n", 
+            "active": true, 
+            "owned_by": "root"
+          }, 
+          {
+            "files": "/var/log/apache2/*", 
+            "exportable": true, 
+            "object_type": "file_group_ownership", 
+            "suggestion": "This folder commonly contains log files for the Apache http server. If permissions on this directory are excessively permissive, a malicious user or automation could mask their activities by tampering with the logs. In addition, the ability to view Apache logs can leak information to attackers that can accelerate and/or amplify other exposures. The ability to view web log files can be used to gather intelligence on the effectiveness of attacks vectored to Apache.\r\n\r\nThe configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 640 is recommended. Because the Apache startup process typically runs with root privileges and is able to initially open and establish a handle to the root-owned files.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\nIf this Apache configuration file has excessively permissive access rights, they should be restricted.\r\nRoot user and group ownership with an ACL of 700 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\nExample command to change ownership to root (may vary depending on system configuration):\r\nsudo chgrp -R adm /var/log/apache2/*\r\n", 
+            "active": true, 
+            "owned_by": "adm"
+          }, 
+          {
+            "files": "/var/log/apache2/*", 
+            "exportable": true, 
+            "object_type": "file_acl", 
+            "acls": "NOT: *1*,*2*,*3*,*5*,*6*,*7*,**1,**2,**3,**4,**5,**6,**7", 
+            "suggestion": "This folder commonly contains log files for the Apache http server. If permissions on this directory are excessively permissive, a malicious user or automation could mask their activities by tampering with the logs. In addition, the ability to view Apache logs can leak information to attackers that can accelerate and/or amplify other exposures. The ability to view web log files can be used to gather intelligence on the effectiveness of attacks vectored to Apache.\r\n\r\nThe configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\n\r\nIf the Apache configuration directory has excessively permissive access rights, they should be restricted.\r\n\r\nRoot user and group ownership with an ACL of 640 is recommended. Because the Apache startup process typically runs with root privileges and is able to initially open and establish a handle to the root-owned files.\r\nIn addition, the ability to view the configuration of the Apache web server environment can leak information to attackers that can accelerate and/or amplify other exposures. The configuration directory of the Apache http server should not be world-readable and should generally only be writable by the root or administrative user.\r\nIf this Apache configuration file has excessively permissive access rights, they should be restricted.\r\nRoot user and group ownership with an ACL of 640 is recommended. Because the Apache startup process typically runs with root privileges and is able to read configuration files as the root user.\r\n\r\nExample command to change mode to 640 (may vary depending on system configuration):\r\nsudo chmod 640 /var/log/apache2/*\r\n", 
+            "active": true
+          }
+        ], 
+        "name": "Protect access to Apache logs"
+      }, 
+      {
+        "comment": "Web server methods are defined in section 9 of RFC 2616 (http://www.ietf.org/rfc/rfc2616.txt). If a web\r\nserver does not require the implementation of all available methods, they should be disabled.\r\n\r\nNote: GET and POST are the most common methods. A majority of the others are limited to the WebDAV\r\nprotocol and expose servers to potential abuse and attack.", 
+        "reference_identifiers": [], 
+        "log": false, 
+        "taxonomy": "software_configuration", 
+        "rule_operator": "AND", 
+        "alert": false, 
+        "critical": false, 
+        "active": true, 
+        "checks": [
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "<LimitExcept GET", 
+            "desired_value": "POST>", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": " ", 
+            "suggestion": "Using the LimitExcept directive for the primary web server and virtual web servers will let us prevent the use of HTTP methods besides GET and POST by adding the line:\r\n\r\n<LimitExcept GET POST>\r\n\r\nLimiting the number of HTTP methods Apache will allow will limit your exposure.\r\n\r\nThe following block added inside a <Directory...> </Directory> block will limit the available methods:\r\n    <LimitExcept GET POST>\r\n        Order deny,allow\r\n        Deny from all\r\n    </LimitExcept>\r\nRemember to restart the server if running:\r\nsudo service apache2 condrestart\r\n", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/mods-enabled/userdir.conf"
+          }, 
+          {
+            "comment_character": "#", 
+            "exportable": true, 
+            "config_item": "TraceEnable", 
+            "desired_value": "off", 
+            "object_type": "configuration_file_setting", 
+            "config_file_section": "", 
+            "delimiter": "", 
+            "suggestion": "The HTTP method TRACE should be turned off since it is often used in cross-site scripting and other attacks.  The fewer HTTP methods you allow - the smaller attack surface you provide.\r\n\r\nYou can add the following line to the configuration file:\r\nTraceEnable off\r\n\r\nAlternatively you can create a shell script with the following commands to make these changes:\r\nsudo sed -i -e 's/#*TraceEnable .*\\)/#\\1/i' /etc/apache2/conf.d/security\r\n#Append a new line at the end with our preferred key and value\r\necho 'TraceEnable off' | sudo tee -a /etc/apache2/conf.d/security\r\n#Restart the service if it was already running, leave stopped if not.\r\nsudo service apache2 condrestart", 
+            "active": true, 
+            "config_file_path": "/etc/apache2/conf.d/security"
+          }
+        ], 
+        "name": "Limit available HTTP methods"
+      }
+    ], 
+    "id": "78de31b0dbec0132fdd83c764e10c221", 
+    "description": "This is a configuration policy for an Apache HTTP server running on Debian or Ubuntu Linux systems. It addresses configuration of the Apache HTTP server itself, not the entire Linux operating system.\r\n\r\nCloudPassage policies may require customization and addition of rules to meet all policy requirements. This and other policy templates can be cloned and customized to fit specific distributions or environments (e.g. varying file paths or process names)."
+  }
+}
