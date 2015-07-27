@@ -54,6 +54,25 @@
       {
         "comment": "", 
         "log_prefix": "", 
+        "firewall_service": {
+          "protocol": "TCP", 
+          "name": "https", 
+          "url": "https://api.cloudpassage.com/v1/firewall_services/ea4b81f09956012ee2db4040ebe4a8e4", 
+          "system": true, 
+          "id": "ea4b81f09956012ee2db4040ebe4a8e4", 
+          "port": "443"
+        }, 
+        "log": false, 
+        "chain": "INPUT", 
+        "url": "https://api.cloudpassage.com/v1/firewall_policies/4b1dbce0887a0132aff93c764e10c221/firewall_rules/ab256a44348811e59a46673ea0a182e4", 
+        "active": true, 
+        "connection_states": null, 
+        "action": "ACCEPT", 
+        "id": "ab256a44348811e59a46673ea0a182e4"
+      }, 
+      {
+        "comment": "", 
+        "log_prefix": "", 
         "log": false, 
         "chain": "INPUT", 
         "url": "https://api.cloudpassage.com/v1/firewall_policies/4b1dbce0887a0132aff93c764e10c221/firewall_rules/8e9307f0dbfa0132fddc3c764e10c221", 
