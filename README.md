@@ -4,4 +4,5 @@ The script is to backup policies from each module in Halo. It is strongly recomm
 
 # Steps 
 ***1.*** Download/clone the script to your local machine
+
 ***2.*** Edit config.conf
