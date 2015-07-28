@@ -9,4 +9,4 @@ The script is to backup policies from each module in Halo. It is strongly recomm
 
 ***3.*** Create directory for each module, including "fim", "csm", "firewall", and "lids"
 
-***4.*** Run python halo-policy-backup.py
+***4.*** Run `python halo-policy-backup.py`
