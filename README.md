@@ -10,3 +10,13 @@ The script is to backup policies from each module in Halo. It is strongly recomm
 ***3.*** Create directory for each module, including "fim", "csm", "firewall", and "lids"
 
 ***4.*** Run `python halo-policy-backup.py`
+
+# Requirements and Dependencies
+
+To get started, you must have the following privileges and software resources:
+
+* An active CloudPassage Halo subscription. If you don't have one, Register for CloudPassage to receive your credentials and further instructions by email.
+* Access to your CloudPassage API key. Create a new key, with write privileges, specifically for use with this script.
+* Python 2.6 or later. 
+* If you don't have gitpython installed, please install it via your terminal.
+  `pip install gitpython`
