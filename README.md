@@ -20,3 +20,6 @@ To get started, you must have the following privileges and software resources:
 * Python 2.6 or later. 
 * If you don't have gitpython installed, please install it via your terminal.
   `pip install gitpython`
+<!---
+#CPTAGS:community-supported archive
+-->
