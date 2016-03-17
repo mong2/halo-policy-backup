@@ -56,8 +56,8 @@ def get_auth_token(host,clientid,clientsecret,prox):
     jsondata =  response.read().decode()
     data = json.loads(jsondata)
     try:
-        if  data['scope'] != 'read':
-            print "You shouldn't be uing a RW key for this script.  You should really be using a RO key."
+        if  data['access_token']:
+            pass
     except:
         print "We're having trouble getting a session token.  Please check your API key."
         print "Error output: "
