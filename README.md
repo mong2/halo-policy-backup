@@ -22,6 +22,6 @@ To get started, you must have the following privileges and software resources:
   `pip install gitpython`
 
 <!---
-#CPTAGS:community-supported archive
+#CPTAGS:community-unsupported archive
 #TBICON:images/python_icon.png
 -->
